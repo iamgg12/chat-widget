@@ -530,28 +530,33 @@
             cursor: not-allowed;
             transform: none;
         }
+
+        .chat-resize-handle {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 18px;
+            height: 18px;
+            cursor: nwse-resize;
+            z-index: 1100;
+            background: rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+        }
+        .chat-resize-handle:hover {
+            background: rgba(16,185,129,0.15);
+        }
+
+        .chat-resize-handle svg {
+            position: absolute;
+            left: 1px;
+            top: 1px;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+            opacity: 0.7;
+        }
     `;
     document.head.appendChild(widgetStyles);
-
-    // === Локализация на испанский ===
-    const localeES = {
-        startChat: 'Iniciar chat',
-        needHelp: '¿Necesitas ayuda?',
-        pleaseEnterName: 'Por favor, introduce tu nombre',
-        pleaseEnterEmail: 'Por favor, introduce tu correo electrónico',
-        pleaseEnterValidEmail: 'Por favor, introduce un correo electrónico válido',
-        registrationTitle: 'Por favor, introduce tus datos para comenzar a chatear',
-        nameLabel: 'Nombre',
-        emailLabel: 'Correo electrónico',
-        namePlaceholder: 'Tu nombre',
-        emailPlaceholder: 'Tu correo electrónico',
-        continueToChat: 'Continuar al chat',
-        responseTime: 'Tiempo de respuesta medio: menos de 1 minuto',
-        poweredBy: 'Desarrollado por n8n',
-        sorryConnect: 'Lo siento, no pude conectar con el servidor. Por favor, inténtalo más tarde.',
-        sorrySend: 'Lo siento, no pude enviar tu mensaje. Por favor, inténtalo de nuevo.',
-        welcomeTitle: '¡Hola! ¿En qué puedo ayudarte?',
-    };
 
     // Default configuration
     const defaultSettings = {
@@ -562,11 +567,11 @@
         branding: {
             logo: '',
             name: '',
-            welcomeText: localeES.welcomeTitle,
-            responseTimeText: localeES.responseTime,
+            welcomeText: '',
+            responseTimeText: 'Tiempo de respuesta medio: menos de 30 segundos!',
             poweredBy: {
-                text: localeES.poweredBy,
-                link: 'https://n8n.partnerlinks.io/fabimarkl'
+                text: 'Desarrollado por Diálogo Digital',
+                link: 'https://dialogodigital.life'
             }
         },
         style: {
@@ -626,24 +631,24 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
-                ${localeES.startChat}
+                Iniciar chat
             </button>
             <p class="chat-response-time">${settings.branding.responseTimeText}</p>
         </div>
         <div class="user-registration">
-            <h2 class="registration-title">${localeES.registrationTitle}</h2>
+            <h2 class="registration-title">Por favor, introduce tus datos para empezar el chat</h2>
             <form class="registration-form">
                 <div class="form-field">
-                    <label class="form-label" for="chat-user-name">${localeES.nameLabel}</label>
-                    <input type="text" id="chat-user-name" class="form-input" placeholder="${localeES.namePlaceholder}" required>
+                    <label class="form-label" for="chat-user-name">Nombre</label>
+                    <input type="text" id="chat-user-name" class="form-input" placeholder="Tu nombre" required>
                     <div class="error-text" id="name-error"></div>
                 </div>
                 <div class="form-field">
-                    <label class="form-label" for="chat-user-email">${localeES.emailLabel}</label>
-                    <input type="email" id="chat-user-email" class="form-input" placeholder="${localeES.emailPlaceholder}" required>
+                    <label class="form-label" for="chat-user-email">Correo electrónico</label>
+                    <input type="email" id="chat-user-email" class="form-input" placeholder="Tu correo electrónico" required>
                     <div class="error-text" id="email-error"></div>
                 </div>
-                <button type="submit" class="submit-registration">${localeES.continueToChat}</button>
+                <button type="submit" class="submit-registration">Continuar al chat</button>
             </form>
         </div>
     `;
@@ -653,7 +658,7 @@
         <div class="chat-body">
             <div class="chat-messages"></div>
             <div class="chat-controls">
-                <textarea class="chat-textarea" placeholder="Type your message here..." rows="1"></textarea>
+                <textarea class="chat-textarea" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
                 <button class="chat-submit">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 2L11 13"></path>
@@ -676,7 +681,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
-        <span class="chat-launcher-text">${localeES.needHelp}</span>`;
+        <span class="chat-launcher-text">¿Necesitas ayuda?</span>`;
     
     // Add elements to DOM
     widgetRoot.appendChild(chatWindow);
@@ -757,17 +762,17 @@
         let isValid = true;
         
         if (!name) {
-            nameError.textContent = localeES.pleaseEnterName;
+            nameError.textContent = 'Por favor, introduce tu nombre';
             nameInput.classList.add('error');
             isValid = false;
         }
         
         if (!email) {
-            emailError.textContent = localeES.pleaseEnterEmail;
+            emailError.textContent = 'Por favor, introduce tu correo electrónico';
             emailInput.classList.add('error');
             isValid = false;
         } else if (!isValidEmail(email)) {
-            emailError.textContent = localeES.pleaseEnterValidEmail;
+            emailError.textContent = 'Por favor, introduce un correo electrónico válido';
             emailInput.classList.add('error');
             isValid = false;
         }
@@ -880,7 +885,7 @@
             // Show error message
             const errorMessage = document.createElement('div');
             errorMessage.className = 'chat-bubble bot-bubble';
-            errorMessage.textContent = localeES.sorryConnect;
+            errorMessage.textContent = "Lo siento, no pude conectar con el servidor. Por favor, inténtalo de nuevo más tarde.";
             messagesContainer.appendChild(errorMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
@@ -948,7 +953,7 @@
             // Show error message
             const errorMessage = document.createElement('div');
             errorMessage.className = 'chat-bubble bot-bubble';
-            errorMessage.textContent = localeES.sorrySend;
+            errorMessage.textContent = "Lo siento, no pude enviar tu mensaje. Por favor, inténtalo de nuevo.";
             messagesContainer.appendChild(errorMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } finally {
@@ -999,5 +1004,39 @@
         button.addEventListener('click', () => {
             chatWindow.classList.remove('visible');
         });
+    });
+
+    // Добавляем resize handle в верхний левый угол
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'chat-resize-handle';
+    resizeHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;pointer-events:none;"><path d="M2 14L14 2" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>`;
+    chatWindow.appendChild(resizeHandle);
+
+    // Логика изменения размера окна
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+    resizeHandle.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(document.defaultView.getComputedStyle(chatWindow).width, 10);
+        startHeight = parseInt(document.defaultView.getComputedStyle(chatWindow).height, 10);
+        document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        let newWidth = startWidth - (e.clientX - startX);
+        let newHeight = startHeight - (e.clientY - startY);
+        // Ограничения по минимальному и максимальному размеру
+        newWidth = Math.max(320, Math.min(600, newWidth));
+        newHeight = Math.max(400, Math.min(800, newHeight));
+        chatWindow.style.width = newWidth + 'px';
+        chatWindow.style.height = newHeight + 'px';
+    });
+    document.addEventListener('mouseup', function() {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.userSelect = '';
+        }
     });
 })();
